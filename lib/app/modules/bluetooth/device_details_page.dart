@@ -32,7 +32,7 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
             child: const Text('Disconnect'),
           ),
           ElevatedButton(
-            onPressed: () => store.readCharacteristic(),
+            onPressed: () => store.subscribeCharacteristic(),
             child: const Text('Dados'),
           ),
         ],

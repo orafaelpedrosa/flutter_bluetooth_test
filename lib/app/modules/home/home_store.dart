@@ -22,7 +22,9 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     Uuid.parse('00001810-0000-1000-8000-00805f9b34fb'),
     Uuid.parse('46a970e00d5f11e28b5e0002a5d5c51b'),
   ];
-  Uuid characteristicUuid = Uuid.parse('00002a35-0000-1000-8000-00805f9b34fb');
+  Uuid characteristicUuid = Uuid.parse('00002A35-0000-1000-8000-00805f9b34fb');
+  //Uuid characteristicUuid = Uuid.parse('0aad7ea00d6011e28e3c0002a5d5c51b');
+
   String? readOutput;
   String? writeOutput;
   String? subscribeOutput;
@@ -120,18 +122,19 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> subscribeCharacteristic() async {
     log('Iniciando caracteristica');
+    log(rxCharacteristic.toString());
     subscribeStream =
         flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
       (data) {
         subscribeOutput = data.toString();
         log(data.toString());
+
       },
     );
+
   }
 
   Future<void> readCharacteristic() async {
-    log('Iniciando caracteristica');
-
     setLoading(true);
     final result =
         await flutterReactiveBle.readCharacteristic(rxCharacteristic);
