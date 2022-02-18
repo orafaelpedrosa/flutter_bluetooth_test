@@ -13,7 +13,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   late StreamSubscription<List<int>>? subscribeStream;
   StreamSubscription<DiscoveredDevice>? scanStream;
   final deviceConnectionController = StreamController<ConnectionStateUpdate>();
-  StreamSubscription<ConnectionStateUpdate>? connection;
+  StreamSubscription<ConnectionStateUpdate>? _connection;
   late StreamSubscription subscription;
   final listDevices = <DiscoveredDevice>[];
   late QualifiedCharacteristic rxCharacteristic;
@@ -22,7 +22,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     Uuid.parse('00001810-0000-1000-8000-00805f9b34fb'),
     Uuid.parse('46a970e00d5f11e28b5e0002a5d5c51b'),
   ];
-  Uuid characteristicUuid = Uuid.parse('2a35');
+  Uuid characteristicUuid = Uuid.parse('00002a35-0000-1000-8000-00805f9b34fb');
   String? readOutput;
   String? writeOutput;
   String? subscribeOutput;
@@ -31,6 +31,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> scanStart(List<Uuid> serviceIds) async {
     listDevices.clear();
+    stopScan();
     scanStarted = true;
     scanStream = flutterReactiveBle
         .scanForDevices(
@@ -60,9 +61,10 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> connect(DiscoveredDevice device) async {
     setLoading(true);
-    disconnect(device);
 
-    connection = flutterReactiveBle
+    _connection?.cancel();
+
+    _connection = flutterReactiveBle
         .connectToDevice(
       id: device.id,
     )
@@ -92,6 +94,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
       onError: (Object e) =>
           log('Connecting to device ${device.name} resulted in error $e'),
     );
+
     if (connected) {
       setLoading(false);
     }
@@ -99,8 +102,9 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> disconnect(DiscoveredDevice device) async {
     try {
+      log((_connection == null).toString());
       log('disconnecting to device: ${device.id}');
-      await connection?.cancel();
+      await _connection?.cancel();
     } on Exception catch (e, _) {
       log("Error disconnecting from a device: $e");
     } finally {
@@ -115,6 +119,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   }
 
   Future<void> subscribeCharacteristic() async {
+    log('Iniciando caracteristica');
     subscribeStream =
         flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
       (data) {
@@ -125,6 +130,8 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   }
 
   Future<void> readCharacteristic() async {
+    log('Iniciando caracteristica');
+
     setLoading(true);
     final result =
         await flutterReactiveBle.readCharacteristic(rxCharacteristic);

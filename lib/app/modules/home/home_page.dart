@@ -4,36 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_triple/flutter_triple.dart';
-import 'package:test_final/app/modules/home/device_list.dart';
+import 'package:test_final/app/modules/bluetooth/device_list_widget.dart';
 import 'home_store.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
   HomePage({Key? key, this.title = "Home"}) : super(key: key);
-  Store store = HomeStore();
+  HomeStore store = Modular.get();
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends ModularState<HomePage, HomeStore> {
-  // final Stream<List<DiscoveredDevice>> bids = (() {
-  //   late final StreamController<List<DiscoveredDevice>> controller;
-  //   controller = StreamController<List<DiscoveredDevice>>(
-  //     onListen: () async {
-  //       await Future<void>.delayed(
-  //         const Duration(seconds: 1),
-  //       );
-  //       controller.stream;
-  //       await Future<void>.delayed(
-  //         const Duration(seconds: 1),
-  //       );
-  //       await controller.close();
-  //     },
-  //   );
-  //   return controller.stream;
-  // })();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,15 +25,15 @@ class _HomePageState extends ModularState<HomePage, HomeStore> {
       ),
       body: ScopedBuilder<HomeStore, Exception, List<DiscoveredDevice>>(
         store: store,
-        onLoading: (_) => const Text('Carregando...'),
         onState: (_, scoped) {
           return SingleChildScrollView(
+            scrollDirection: Axis.vertical,
             child: Column(
               children: [
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () => store.scanStart([]),
+                      onPressed: () => store.scanStart(store.serviceIds),
                       child: const Text('Scan'),
                     ),
                   ],
@@ -58,10 +41,6 @@ class _HomePageState extends ModularState<HomePage, HomeStore> {
                 DeviceList(
                   discoveredDevice: store.listDevices,
                 ),
-                /*FloatingActionButton(
-                  onPressed: () => store.scanStart([]),
-                  child: const Icon(Icons.search),
-                )*/
               ],
             ),
           );
