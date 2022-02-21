@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_triple/flutter_triple.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   bool foundDeviceWaitingToConnect = false;
@@ -36,6 +37,13 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   ) async {
     listDevices.clear();
     stopScan();
+    var bleStatus = await Permission.bluetoothScan.status;
+    log(bleStatus.toString());
+
+    if (bleStatus.isGranted) {
+      await Permission.bluetoothScan.request();
+    }
+    
     scanStarted = true;
     scanStream = flutterReactiveBle.scanForDevices(
       withServices: [],

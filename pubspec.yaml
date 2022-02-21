@@ -37,6 +37,7 @@ dependencies:
   flutter_reactive_ble: ^5.0.2
   flutter_modular: ^4.4.0+1
   flutter_triple: ^1.2.6
+  permission_handler: ^9.1.0
 
 dev_dependencies:
   flutter_test:
