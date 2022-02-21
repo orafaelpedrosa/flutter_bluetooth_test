@@ -31,16 +31,16 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   HomeStore() : super([]);
 
-  Future<void> scanStart(List<Uuid> serviceIds) async {
+  Future<void> scanStart(
+    List<Uuid> serviceIds,
+  ) async {
     listDevices.clear();
     stopScan();
     scanStarted = true;
-    scanStream = flutterReactiveBle
-        .scanForDevices(
-      withServices: serviceIds,
-      requireLocationServicesEnabled: true,
-    )
-        .listen(
+    scanStream = flutterReactiveBle.scanForDevices(
+      withServices: [],
+      requireLocationServicesEnabled: false,
+    ).listen(
       (device) {
         final knownDeviceIndex =
             listDevices.indexWhere((d) => d.id == device.id);
@@ -62,7 +62,6 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   }
 
   Future<void> connect(DiscoveredDevice device) async {
-
     setLoading(true);
     _connection?.cancel();
     _connection = flutterReactiveBle
@@ -104,7 +103,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   Future<void> disconnect(DiscoveredDevice device) async {
     try {
       log((_connection == null).toString());
-      log('disconnecting to device: ${device.id}');
+      log('disconnecting to device: ${device.name}');
       await _connection?.cancel();
     } on Exception catch (e, _) {
       log("Error disconnecting from a device: $e");
@@ -119,7 +118,8 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     }
   }
 
-  Future<List<DiscoveredService>> discoverServices(DiscoveredDevice device) async {
+  Future<List<DiscoveredService>> discoverServices(
+      DiscoveredDevice device) async {
     setLoading(true);
     try {
       log('Start discovering services for: ${device.name}');

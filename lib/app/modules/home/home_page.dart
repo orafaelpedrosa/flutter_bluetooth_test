@@ -33,7 +33,7 @@ class _HomePageState extends ModularState<HomePage, HomeStore> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () => store.scanStart(store.serviceIds),
+                      onPressed: () => store.scanStart([]),
                       child: const Text('Scan'),
                     ),
                   ],
