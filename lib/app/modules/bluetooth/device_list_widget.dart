@@ -46,6 +46,7 @@ class _DeviceListState extends State<DeviceList> {
                     Icons.bluetooth,
                   ),
                   title: Text(device.name),
+                  subtitle: Text(device.rssi.toString()),
                   onTap: () {
                     store.connect(device).whenComplete(
                           () => Modular.to

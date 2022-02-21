@@ -77,11 +77,20 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
             {
               foundDeviceWaitingToConnect = true;
               connected = true;
-              rxCharacteristic = QualifiedCharacteristic(
-                characteristicId: characteristicUuid,
-                serviceId: serviceIds.first,
-                deviceId: device.id,
-              );
+
+              device.name == 'Nonin3230_501570986'
+                  ? rxCharacteristic = QualifiedCharacteristic(
+                      characteristicId:
+                          Uuid.parse('0aad7ea00d6011e28e3c0002a5d5c51b'),
+                      serviceId: Uuid.parse('46a970e00d5f11e28b5e0002a5d5c51b'),
+                      deviceId: device.id,
+                    )
+                  : rxCharacteristic = QualifiedCharacteristic(
+                      characteristicId: Uuid.parse('2a35'),
+                      serviceId: Uuid.parse('1810'),
+                      deviceId: device.id,
+                    );
+
               break;
             }
           case DeviceConnectionState.disconnected:
@@ -102,7 +111,6 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> disconnect(DiscoveredDevice device) async {
     try {
-      log((_connection == null).toString());
       log('disconnecting to device: ${device.name}');
       await _connection?.cancel();
     } on Exception catch (e, _) {
@@ -135,6 +143,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   Future<void> subscribeCharacteristic() async {
     if (connected) {
       log('Iniciando caracteristica');
+
       log(rxCharacteristic.toString());
       subscribeStream =
           flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
