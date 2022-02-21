@@ -62,10 +62,9 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   }
 
   Future<void> connect(DiscoveredDevice device) async {
+
     setLoading(true);
-
     _connection?.cancel();
-
     _connection = flutterReactiveBle
         .connectToDevice(
       id: device.id,
@@ -120,18 +119,31 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     }
   }
 
+  Future<List<DiscoveredService>> discoverServices(DiscoveredDevice device) async {
+    setLoading(true);
+    try {
+      log('Start discovering services for: ${device.name}');
+      final result = await flutterReactiveBle.discoverServices(device.id);
+      log('Discovering services finished');
+      return result;
+    } on Exception catch (e) {
+      log('Error occured when discovering services: $e');
+      rethrow;
+    }
+  }
+
   Future<void> subscribeCharacteristic() async {
-    log('Iniciando caracteristica');
-    log(rxCharacteristic.toString());
-    subscribeStream =
-        flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
-      (data) {
-        subscribeOutput = data.toString();
-        log(data.toString());
-
-      },
-    );
-
+    if (connected) {
+      log('Iniciando caracteristica');
+      log(rxCharacteristic.toString());
+      subscribeStream =
+          flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
+        (data) {
+          subscribeOutput = data.toString();
+          log(data.toString());
+        },
+      );
+    }
   }
 
   Future<void> readCharacteristic() async {
