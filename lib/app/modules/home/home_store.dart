@@ -166,6 +166,72 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     }
   }
 
+  Future<void> getData(DiscoveredDevice device) async {
+    setLoading(true);
+    _connection?.cancel();
+    _connection = flutterReactiveBle
+        .connectToDevice(
+      id: device.id,
+      connectionTimeout: const Duration(seconds: 5),
+    )
+        .listen(
+      (update) async {
+        log('${device.name}: ${update.connectionState}');
+        deviceConnectionController.add(update);
+        switch (update.connectionState) {
+          case DeviceConnectionState.connected:
+            {
+              bool onDevice = false;
+              listDiscoveredService =
+                  await flutterReactiveBle.discoverServices(device.id);
+              listDiscoveredService.forEach(
+                (service) {
+                  service.characteristics.forEach(
+                    (characteristics) {
+                      switch (characteristics.characteristicId.toString()) {
+                        case '2a35':
+                          onDevice = true;
+                          break;
+                        case '0aad7ea0-0d60-11e2-8e3c-0002a5d5c51b':
+                          onDevice = true;
+                          break;
+                        default:
+                          onDevice = false;
+                      }
+                      if (onDevice) {
+                        onDevice = false;
+                        rxCharacteristic = QualifiedCharacteristic(
+                          characteristicId: characteristics.characteristicId,
+                          serviceId: characteristics.serviceId,
+                          deviceId: device.id,
+                        );
+                      }
+                    },
+                  );
+                },
+              );
+              subscribeStream = flutterReactiveBle
+                  .subscribeToCharacteristic(rxCharacteristic)
+                  .listen(
+                (data) {
+                  subscribeOutput = data.toString();
+                  log(data.toString());
+                },
+              );
+              break;
+            }
+          case DeviceConnectionState.disconnected:
+            {
+              break;
+            }
+          default:
+        }
+      },
+      onError: (Object e) =>
+          log('Connecting to device ${device.name} resulted in error $e'),
+    );
+  }
+
   Future<void> readCharacteristic() async {
     setLoading(true);
     final result =
