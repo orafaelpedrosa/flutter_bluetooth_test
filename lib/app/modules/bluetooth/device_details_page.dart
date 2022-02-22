@@ -33,9 +33,8 @@ class _DeviceDetailsPageState extends State<DeviceDetailsPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              store
-                  .discoverServices(widget.device)
-                  .whenComplete(() => store.subscribeCharacteristic());
+              store.discoverServices(widget.device);
+              //store.subscribeCharacteristic();
             },
             //onPressed: () => store.subscribeCharacteristic(),
             child: const Text('Dados'),

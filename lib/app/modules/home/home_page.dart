@@ -30,14 +30,6 @@ class _HomePageState extends ModularState<HomePage, HomeStore> {
             scrollDirection: Axis.vertical,
             child: Column(
               children: [
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => store.scanStart([]),
-                      child: const Text('Scan'),
-                    ),
-                  ],
-                ),
                 DeviceList(
                   discoveredDevice: store.listDevices,
                 ),
@@ -46,6 +38,34 @@ class _HomePageState extends ModularState<HomePage, HomeStore> {
           );
         },
       ),
+      /*floatingActionButton: TripleBuilder(
+        store: store,
+        builder: (_, triple) {
+          return store.scanStarted
+              ? FloatingActionButton(
+                  onPressed: () => store.stopScan(),
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.stop),
+                )
+              : FloatingActionButton(
+                  onPressed: () => store.scanStart([]),
+                  backgroundColor: Colors.blue,
+                  child: const Icon(Icons.search),
+                );
+        },
+      ),*/
+
+      floatingActionButton: store.scanStarted
+          ? FloatingActionButton(
+              onPressed: () => store.stopScan(),
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.stop),
+            )
+          : FloatingActionButton(
+              onPressed: () => store.scanStart([]),
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.search),
+            ),
     );
   }
 }

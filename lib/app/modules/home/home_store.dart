@@ -15,6 +15,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   StreamSubscription<DiscoveredDevice>? scanStream;
   final deviceConnectionController = StreamController<ConnectionStateUpdate>();
   StreamSubscription<ConnectionStateUpdate>? _connection;
+  Stream<ConnectionStateUpdate>? connectionS;
   late StreamSubscription subscription;
   final listDevices = <DiscoveredDevice>[];
   late List<DiscoveredService> listDiscoveredService = <DiscoveredService>[];
@@ -58,6 +59,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   }
 
   Future<void> stopScan() async {
+    scanStarted = false;
     if (scanStream != null) scanStream?.cancel();
     scanStarted = false;
   }
@@ -68,7 +70,6 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     _connection = flutterReactiveBle
         .connectToDevice(
       id: device.id,
-      connectionTimeout: const Duration(seconds: 5),
     )
         .listen(
       (update) {
@@ -95,6 +96,16 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     if (connected) {
       setLoading(false);
     }
+  }
+
+  Future<void> connectDevice(DiscoveredDevice device) async {
+    _connection = flutterReactiveBle
+        .connectToDevice(
+      id: device.id,
+    )
+        .listen((event) {
+      log(event.toString());
+    });
   }
 
   Future<void> disconnect(DiscoveredDevice device) async {
@@ -127,6 +138,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
             (characteristics) {
               switch (characteristics.characteristicId.toString()) {
                 case '2a35':
+                  log(characteristics.toString());
                   onDevice = true;
                   break;
                 case '0aad7ea0-0d60-11e2-8e3c-0002a5d5c51b':

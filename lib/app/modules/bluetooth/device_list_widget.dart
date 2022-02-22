@@ -47,7 +47,12 @@ class _DeviceListState extends State<DeviceList> {
                   ),
                   title: Text(device.name),
                   subtitle: Text(device.rssi.toString()),
-                  onTap: () => store.getData(device),
+                 onTap: () {
+                    store.connectDevice(device).whenComplete(
+                          () => Modular.to
+                              .pushNamed('device_details', arguments: device),
+                        );
+                  },
                   /*onTap: () {
                     store.connect(device).whenComplete(
                           () => Modular.to

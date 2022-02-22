@@ -1,0 +1,4 @@
+#Tue Feb 22 12:35:18 BRT 2022
+base.0=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
