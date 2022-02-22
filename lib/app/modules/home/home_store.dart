@@ -17,6 +17,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
   StreamSubscription<ConnectionStateUpdate>? _connection;
   late StreamSubscription subscription;
   final listDevices = <DiscoveredDevice>[];
+  late List<DiscoveredService> listDiscoveredService = <DiscoveredService>[];
   late QualifiedCharacteristic rxCharacteristic;
 
   final List<Uuid> serviceIds = [
@@ -32,19 +33,11 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   HomeStore() : super([]);
 
-  Future<void> scanStart(
-    List<Uuid> serviceIds,
-  ) async {
+  Future<void> scanStart(List<Uuid> serviceIds) async {
     listDevices.clear();
     stopScan();
-    var bleStatus = await Permission.bluetoothScan.status;
-    log(bleStatus.toString());
-
-    if (bleStatus.isGranted) {
-      await Permission.bluetoothScan.request();
-    }
-    
     scanStarted = true;
+
     scanStream = flutterReactiveBle.scanForDevices(
       withServices: [],
       requireLocationServicesEnabled: false,
@@ -75,6 +68,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     _connection = flutterReactiveBle
         .connectToDevice(
       id: device.id,
+      connectionTimeout: const Duration(seconds: 5),
     )
         .listen(
       (update) {
@@ -85,20 +79,6 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
             {
               foundDeviceWaitingToConnect = true;
               connected = true;
-
-              device.name == 'Nonin3230_501570986'
-                  ? rxCharacteristic = QualifiedCharacteristic(
-                      characteristicId:
-                          Uuid.parse('0aad7ea00d6011e28e3c0002a5d5c51b'),
-                      serviceId: Uuid.parse('46a970e00d5f11e28b5e0002a5d5c51b'),
-                      deviceId: device.id,
-                    )
-                  : rxCharacteristic = QualifiedCharacteristic(
-                      characteristicId: Uuid.parse('2a35'),
-                      serviceId: Uuid.parse('1810'),
-                      deviceId: device.id,
-                    );
-
               break;
             }
           case DeviceConnectionState.disconnected:
@@ -134,14 +114,39 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
     }
   }
 
-  Future<List<DiscoveredService>> discoverServices(
-      DiscoveredDevice device) async {
+  Future<void> discoverServices(DiscoveredDevice device) async {
     setLoading(true);
     try {
       log('Start discovering services for: ${device.name}');
-      final result = await flutterReactiveBle.discoverServices(device.id);
-      log('Discovering services finished');
-      return result;
+      bool onDevice = false;
+      listDiscoveredService =
+          await flutterReactiveBle.discoverServices(device.id);
+      listDiscoveredService.forEach(
+        (service) {
+          service.characteristics.forEach(
+            (characteristics) {
+              switch (characteristics.characteristicId.toString()) {
+                case '2a35':
+                  onDevice = true;
+                  break;
+                case '0aad7ea0-0d60-11e2-8e3c-0002a5d5c51b':
+                  onDevice = true;
+                  break;
+                default:
+                  onDevice = false;
+              }
+              if (onDevice) {
+                onDevice = false;
+                rxCharacteristic = QualifiedCharacteristic(
+                  characteristicId: characteristics.characteristicId,
+                  serviceId: characteristics.serviceId,
+                  deviceId: device.id,
+                );
+              }
+            },
+          );
+        },
+      );
     } on Exception catch (e) {
       log('Error occured when discovering services: $e');
       rethrow;
@@ -150,9 +155,7 @@ class HomeStore extends NotifierStore<Exception, List<DiscoveredDevice>> {
 
   Future<void> subscribeCharacteristic() async {
     if (connected) {
-      log('Iniciando caracteristica');
-
-      log(rxCharacteristic.toString());
+      log('Starting subscribe characteristic...');
       subscribeStream =
           flutterReactiveBle.subscribeToCharacteristic(rxCharacteristic).listen(
         (data) {

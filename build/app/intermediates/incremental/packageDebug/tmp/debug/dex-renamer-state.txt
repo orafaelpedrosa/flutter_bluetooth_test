@@ -1,10 +1,13 @@
-#Mon Feb 21 13:37:08 BRT 2022
-base.2=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeLibDexDebug/classes_0.dex
+#Tue Feb 22 09:43:35 BRT 2022
+path.3=classes_1.dex
 path.2=classes_0.dex
-base.1=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeProjectDexDebug/classes.dex
 path.1=classes.dex
+path.0=classes.dex
+base.3=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeLibDexDebug/classes_1.dex
+base.2=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeLibDexDebug/classes_0.dex
+base.1=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeProjectDexDebug/classes.dex
 base.0=/Users/diagnose/Documents/Projetos/flutter_bluetooth/build/app/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+renamed.3=classes4.dex
 renamed.2=classes3.dex
 renamed.1=classes2.dex
 renamed.0=classes.dex
-path.0=classes.dex
